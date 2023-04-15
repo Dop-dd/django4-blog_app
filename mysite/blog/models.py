@@ -1,6 +1,9 @@
 from django.db import models
 from django.utils import timezone
 from django.contrib.auth.models import User
+# canonical url
+from django.urls import reverse
+
 
 # part two: create a custom manager to retrieve all posts that have a PUBLISHED status.queryset.
 class PublishedManager(models.Manager):
@@ -16,7 +19,8 @@ class Post(models.Model):
         PUBLISHED = 'PB', 'Published'
 
     title = models.CharField(max_length=200)
-    slug = models.SlugField(max_length=200)
+    slug = models.SlugField(max_length=200,
+                            unique_for_date='publish')
     #5. Adding a many-to-one relationship
     author = models.ForeignKey(User,
                                on_delete=models.CASCADE,
@@ -43,4 +47,14 @@ class Post(models.Model):
 
     def __str__(self):
         return self.title
+
+    # canonican url
+    def get_absolute_url(self):
+        # function will build the URL dynamically
+        # id of the Post object as a positional argument by using self..
+        return reverse('blog:post_detail',
+                       args=[self.publish.year,
+                             self.publish.month,
+                             self.publish.day,
+                             self.slug])
 
